@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">                               
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #profileDropdown {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        #profilePicture {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: black;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            right: 0;
+            z-index: 1;
+            min-width: 150px;
+            margin-top: 280px; /* Space between profile picture and dropdown */
+        }
+
+        #profileDropdown:hover .dropdown-content {
+            display: block; /* Show dropdown on hover */
+        }
+
+        .dropdown-content button {
+            display: block;
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .dropdown-content button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .test-box, .info-box {
+            border: 1px solid #007BFF;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .test-box.dark-mode, .info-box.dark-mode {
+            background-color: #444;
+            color: #fff;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border: none;
+            background: #007BFF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+
+        .message {
+            color: green;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: gray;
+            color: white;
+        }
+
+        body.dark-mode {
+            background-color: #333;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .mode-button {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <div id="profileDropdown">
+        <img id="profilePicture" src="logo.jpg" alt="Profile Picture" />
+        <div class="dropdown-content" id="dropdownContent">
+            <button onclick="changeProfilePicture()">Change Profile Picture</button>
+            <button onclick="deleteAccount()">Delete Account</button>
+            <button onclick="helpUs()">Help Us</button>
+            <button onclick="logout()">Logout 👋</button>
+        </div>
+        <button class="mode-button" onclick="setLightMode()">
+            🌞
+        </button>
+        <button class="mode-button" onclick="setDarkMode()">
+            🌙
+        </button>
+    </div>
+
+    <div id="welcomeMessage"></div>
+
+    <div class="test-box" id="testBox">
+        <h2>Test</h2>
+        <p>To make sure you have some cybersecurity information and hacking skills, we will test you.</p>
+        <button id="testButton" onclick="startTest()">Take the Test</button>
+        <div id="testMessage" class="message"></div>
+        <div id="questions" style="display: none;"></div>
+        <button id="submitButton" style="display: none;" onclick="finalizeTest()">Submit</button>
+    </div>
+
+    <div id="infoBoxes" style="display: none;">
+        <div class="info-box"><h3>Introduction</h3></div>
+        <div class="info-box"><h3>What Will You Learn</h3></div>
+        <div class="info-box"><h3>What Will You Do</h3></div>
+        <div class="info-box"><h3>What Will You Execute</h3></div>
+    </div>
+
+    <!-- Modal for Help Us -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Help Us</h2>
+            <textarea id="helpMessage" rows="4" style="width: 100%;" placeholder="Type your message here..."></textarea>
+            <input type="email" id="userEmail" placeholder="Your email" required />
+            <button onclick="sendHelpMessage()">Submit</button>
+            <div id="helpResponse" class="message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Retrieve username from localStorage
+        const username = localStorage.getItem('username') || 'User';
+        document.getElementById('welcomeMessage').innerHTML = `<strong>Welcome dear ${username}</strong>`;
+
+        // Questions for the test
+        const questions = [
+            { question: "Is phishing a cyber attack? (True/False)", answer: true },
+            { question: "Can a strong password be easily guessed? (True/False)", answer: false },
+            { question: "Is it safe to share your password with friends? (True/False)", answer: false },
+            { question: "Are antivirus programs useless? (True/False)", answer: false },
+            { question: "Is it legal to hack into someone's account if you find it open? (True/False)", answer: false }
+        ];
+
+        let correctAnswers = 0;
+
+        // Check if the test was already taken
+        const testResult = localStorage.getItem(`${username}_testResult`);
+        if (testResult) {
+            lockTestBox();
+            unlockBoxes();
+        }
+
+        // Function to start the test
+        function startTest() {
+            correctAnswers = 0; // Reset correct answers for each test
+            const questionContainer = document.getElementById('questions');
+            questionContainer.innerHTML = '';
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.innerHTML = `
+                    <p>${q.question}</p>
+                    <button class="answer-button" onclick="submitAnswer(${index}, true, this)">True</button>
+                    <button class="answer-button" onclick="submitAnswer(${index}, false, this)">False</button>
+                `;
+                questionContainer.appendChild(questionDiv);
+            });
+
+            questionContainer.style.display = 'block';
+            document.getElementById('submitButton').style.display = 'block'; // Show the submit button
+        }
+
+        // Submit answer function
+        function submitAnswer(index, answer, button) {
+            const buttons = button.parentElement.querySelectorAll('.answer-button');
+            buttons.forEach(btn => btn.classList.remove('highlight')); // Remove highlight from all buttons
+            button.classList.add('highlight'); // Highlight the clicked button
+
+            if (answer === questions[index].answer) correctAnswers++;
+        }
+
+        // Finalize the test and save results
+        function finalizeTest() {
+            localStorage.setItem(`${username}_testResult`, correctAnswers >= 3 ? 'success' : 'fail');
+            lockTestBox();
+            unlockBoxes();
+        }
+
+        // Lock test box after completion
+        function lockTestBox() {
+            document.getElementById('testBox').style.pointerEvents = 'none';
+            document.getElementById('testBox').style.opacity = '0.5';
+        }
+
+        // Unlock boxes
+        function unlockBoxes() {
+            document.getElementById('infoBoxes').style.display = 'block';
+            document.querySelectorAll('.info-box').forEach(box => {
+                box.classList.add('dark-mode');
+            });
+        }
+
+        // Dark mode functions
+        function setDarkMode() {
+            document.body.classList.add('dark-mode');
+            document.querySelectorAll('.test-box, .info-box').forEach(box => {
+                box.classList.add('dark-mode');
+            });
+        }
+
+        function setLightMode() {
+            document.body.classList.remove('dark-mode');
+            document.querySelectorAll('.test-box, .info-box').forEach(box => {
+                box.classList.remove('dark-mode');
+            });
+        }
+
+        // Help Us functionality
+        function helpUs() {
+            document.getElementById('helpModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('helpModal').style.display = 'none';
+            document.getElementById('helpResponse').innerText = '';
+            document.getElementById('helpMessage').value = '';
+            document.getElementById('userEmail').value = '';
+        }
+
+        function sendHelpMessage() {
+            const message = document.getElementById('helpMessage').value;
+            const email = document.getElementById('userEmail').value;
+
+            // Simulate sending email
+            console.log(`Sending message: ${message} from email: ${email}`);
+            document.getElementById('helpResponse').innerText = 'Your message has been sent!';
+            closeModal();
+        }
+    </script>
+</body>
+</html>

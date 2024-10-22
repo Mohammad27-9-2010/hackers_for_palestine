@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackers for Palestine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        nav {
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #007BFF;
+            padding: 10px 15px;
+            border: 2px solid #007BFF;
+            border-radius: 5px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        nav a:hover {
+            background: #007BFF;
+            color: white;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+            margin-bottom: 20px;
+        }
+
+        form input, form select {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        form input[type="submit"] {
+            background: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        form input[type="submit"]:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            color: green;
+            font-weight: bold;
+        }
+
+        .collapsible {
+            display: none;
+            margin-top: 10px;
+        }
+
+        #logo {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <img id="logo" src="logo.jpg" alt="Logo"> <!-- Replace with your logo URL -->
+    <h1>Welcome to Hackers for Palestine</h1>
+    <nav>
+        <a href="#" onclick="toggleSection('register')">Register</a>
+        <a href="#" onclick="toggleSection('login')">Login</a>
+        <a href="#" onclick="toggleSection('terms')">Terms and Conditions</a>
+    </nav>
+
+    <!-- Registration Section -->
+    <div id="register" class="collapsible">
+        <h2>Register</h2>
+        <form id="registrationForm">
+            <input type="text" id="registerUsername" placeholder="Username" required>
+            <input type="password" id="registerPassword" placeholder="Password" required>
+            <select id="country" required>
+                <option value="" disabled selected>Select your country</option>
+            </select>
+            <input type="submit" value="Register">
+        </form>
+        <p id="registrationMessage" class="message"></p>
+    </div>
+
+    <!-- Login Section -->
+    <div id="login" class="collapsible">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="text" id="loginUsername" placeholder="Username" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <input type="submit" value="Login">
+        </form>
+        <p id="loginMessage" class="message"></p>
+    </div>
+
+    <!-- Terms and Conditions Section -->
+    <div id="terms" class="collapsible">
+        <h2>Terms and Conditions</h2>
+        <p>You cannot post any screenshots of this website on social media.</p>
+    </div>
+
+    <script>
+        // Country list
+        const countries = [
+            "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", 
+            "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", 
+            "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", 
+            "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", 
+            "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", 
+            "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", 
+            "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", 
+            "Cuba", "Cyprus", "Czech Republic", "Democratic Republic of the Congo", 
+            "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", 
+            "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", 
+            "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", 
+            "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", 
+            "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", 
+            "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", 
+            "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", 
+            "Kiribati", "Korea (North)", "Korea (South)", "Kosovo", "Kuwait", 
+            "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", 
+            "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", 
+            "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", 
+            "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", 
+            "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", 
+            "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", 
+            "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", 
+            "Oman", "Pakistan", "Palestine", "Panama", "Papua New Guinea", 
+            "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", 
+            "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", 
+            "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", 
+            "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", 
+            "Serbia", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", 
+            "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", 
+            "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Tajikistan", 
+            "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad and Tobago", 
+            "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", 
+            "United Arab Emirates", "United Kingdom", "United States", 
+            "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela", "Vietnam", "Yemen", 
+            "Zambia", "Zimbabwe"
+        ];
+
+        // Populate country select
+        const countrySelect = document.getElementById('country');
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.toLowerCase().replace(/\s+/g, '_'); // Format for the value
+            option.textContent = country;
+            countrySelect.appendChild(option);
+        });
+
+        // Toggle visibility of sections
+        function toggleSection(sectionId) {
+            const sections = document.querySelectorAll('.collapsible');
+            sections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.style.display = section.style.display === 'block' ? 'none' : 'block';
+                } else {
+                    section.style.display = 'none'; // Close other sections
+                }
+            });
+        }
+
+        // Handle registration
+        document.getElementById('registrationForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            // Validate username
+            if (!/^[^\s'"]+$/.test(username)) {
+                alert("Username cannot contain spaces or quotes.");
+                return;
+            }
+
+            // Validate password
+            if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+                alert("Password must be at least 8 characters long and contain both letters and numbers.");
+                return;
+            }
+
+            const country = document.getElementById('country').value;
+            document.getElementById('registrationMessage').textContent = `Registration successful for user: ${username} from ${country}`;
+            document.getElementById('registrationForm').reset(); // Reset the form
+        });
+
+        // Handle login
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Validate username
+            if (!/^[^\s'"]+$/.test(username)) {
+                alert("Username cannot contain spaces or quotes.");
+                return;
+            }
+
+            // Validate password
+            if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+                alert("Password must be at least 8 characters long and contain both letters and numbers.");
+                return;
+            }
+
+            // Simulate successful login
+            document.getElementById('loginMessage').textContent = `Login successful for user: ${username}`;
+            
+            // Redirect to a dashboard (replace 'dashboard.html' with your actual page)
+            window.location.href = 'dashboard.html'; 
+        });
+    </script>
+</body>
+</html>
